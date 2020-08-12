@@ -9,6 +9,9 @@
 #include <stdarg.h>
 #include <string.h>
 
+// BD: see below
+#include <signal.h>
+
 static inline int
 verbosity (kissat * solver)
 {
@@ -48,6 +51,24 @@ kissat_warning (kissat * solver, const char *fmt, ...)
 #endif
 }
 
+/*
+ * BD: local replacement for kissat_signal_name
+ * that's missing from libkissat.a.
+ *
+ * Function kissat_signal_name is implemented in handle.c
+ * but handle.o is not included in libkissat.a.
+ */
+static const char *sig_name(int sig) {
+  switch (sig) {
+  case SIGABRT: return "SIGABRT";
+  case SIGINT:  return "SIGINT";
+  case SIGSEGV: return "SIGSEGV";
+  case SIGTERM: return "SIGTERM";
+  case SIGALRM: return "SIGALRM";
+  default: return "SIGUNKNOWN";
+  }
+}
+
 void
 kissat_signal (kissat * solver, const char *type, int sig)
 {
@@ -56,7 +77,9 @@ kissat_signal (kissat * solver, const char *type, int sig)
   TERMINAL (stdout, 1);
   fputs ("c ", stdout);
   COLOR (BOLD RED);
-  printf ("%s signal %d (%s)", type, sig, kissat_signal_name (sig));
+  // BD: see above.
+  // printf ("%s signal %d (%s)", type, sig, kissat_signal_name (sig));
+  printf ("%s signal %d (%s)", type, sig, sig_name (sig));
   COLOR (NORMAL);
   fputc ('\n', stdout);
   fflush (stdout);
