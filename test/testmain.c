@@ -1,5 +1,3 @@
-#include "test.h"
-
 #include "../src/handle.h"
 
 #include <signal.h>
@@ -7,12 +5,14 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "test.h"
+
 static void
 test_main_version (void)
 {
   const size_t len = strlen (tissat_root) + 32;
   char *cmd = malloc (len);
-  sprintf (cmd, "%s/kissat --banner", tissat_root);
+  sprintf (cmd, "\"%s/kissat\" --banner", tissat_root);
   tissat_verbose ("executing 'system (\"%s\")':", cmd);
   tissat_verbose ("");
   int wstatus = system (cmd);
@@ -134,7 +134,7 @@ execute_solver_and_send_signal (int sig)
 
 #ifdef ASAN
 
-#define SIGNALS \
+#define TEST_SIGNALS \
 SIGNAL(SIGABRT) \
 SIGNAL(SIGALRM) \
 SIGNAL(SIGINT) \
@@ -142,7 +142,7 @@ SIGNAL(SIGTERM)
 
 #else
 
-#define SIGNALS \
+#define TEST_SIGNALS \
 SIGNAL(SIGABRT) \
 SIGNAL(SIGALRM) \
 SIGNAL(SIGINT) \
@@ -159,7 +159,7 @@ test_main_ ## NAME (void) \
   execute_solver_and_send_signal (NAME); \
 }
 
-SIGNALS
+TEST_SIGNALS
 #undef SIGNAL
 #endif
   void
@@ -170,7 +170,7 @@ tissat_schedule_main (void)
   if (tissat_found_test_directory)
     {
 #define SIGNAL(NAME) SCHEDULE_FUNCTION (test_main_ ## NAME);
-      SIGNALS
+      TEST_SIGNALS
 #undef SIGNAL
     }
 #endif

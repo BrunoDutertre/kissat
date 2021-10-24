@@ -1,7 +1,6 @@
 #include "handle.h"
 
 #include <assert.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -9,31 +8,12 @@ static void (*handler) (int);
 static volatile int caught_signal;
 static volatile bool handler_set;
 
-#define SIGNALS \
-SIGNAL(SIGABRT) \
-SIGNAL(SIGBUS) \
-SIGNAL(SIGINT) \
-SIGNAL(SIGSEGV) \
-SIGNAL(SIGTERM)
-
 // *INDENT-OFF*
 
 #define SIGNAL(SIG) \
 static void (*SIG ## _handler)(int);
 SIGNALS
 #undef SIGNAL
-
-const char *
-kissat_signal_name (int sig)
-{
-#define SIGNAL(SIG) \
-  if (sig == SIG) return #SIG;
-  SIGNALS
-#undef SIGNAL
-  if (sig == SIGALRM)
-    return "SIGALRM";
-  return "SIGUNKNOWN";
-}
 
 void
 kissat_reset_signal_handler (void)
@@ -77,8 +57,8 @@ kissat_init_signal_handler (void (*h) (int sig))
 
 static volatile bool caught_alarm;
 static volatile bool alarm_handler_set;
-static void (*SIGALRM_handler) (int);
-static void (*handle_alarm) ();
+static void (*volatile SIGALRM_handler) (int);
+static void (*volatile handle_alarm) ();
 
 static void
 catch_alarm (int sig)
@@ -86,11 +66,13 @@ catch_alarm (int sig)
   assert (sig == SIGALRM);
   if (caught_alarm)
     return;
+  caught_alarm = true;
+  static void (*volatile handler) ();
+  handler = handle_alarm;
   if (!alarm_handler_set)
     raise (sig);
-  assert (handle_alarm);
-  caught_alarm = true;
-  handle_alarm ();
+  assert (handler);
+  handler ();
 }
 
 void
