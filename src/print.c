@@ -1,9 +1,9 @@
 #ifndef QUIET
 
+#include "print.h"
 #include "colors.h"
 #include "handle.h"
 #include "internal.h"
-#include "print.h"
 
 #include <inttypes.h>
 #include <stdarg.h>
@@ -12,9 +12,7 @@
 // BD: see below
 #include <signal.h>
 
-static inline int
-verbosity (kissat * solver)
-{
+static inline int verbosity (kissat *solver) {
   if (!solver)
     return -1;
 #ifdef LOGGING
@@ -30,9 +28,7 @@ verbosity (kissat * solver)
 #endif
 }
 
-void
-kissat_warning (kissat * solver, const char *fmt, ...)
-{
+void kissat_warning (kissat *solver, const char *fmt, ...) {
   if (verbosity (solver) < 0)
     return;
   TERMINAL (stdout, 1);
@@ -69,25 +65,21 @@ static const char *sig_name(int sig) {
   }
 }
 
-void
-kissat_signal (kissat * solver, const char *type, int sig)
-{
+void kissat_signal (kissat *solver, const char *type, int sig) {
   if (verbosity (solver) < 0)
     return;
   TERMINAL (stdout, 1);
   fputs ("c ", stdout);
   COLOR (BOLD RED);
-  // BD: see above.
-  // printf ("%s signal %d (%s)", type, sig, kissat_signal_name (sig));
-  printf ("%s signal %d (%s)", type, sig, sig_name (sig));
+  //  printf ("%s signal %d (%s)", type, sig, kissat_signal_name (sig));
+   printf ("%s signal %d (%s)", type, sig, sig_name (sig));
   COLOR (NORMAL);
   fputc ('\n', stdout);
   fflush (stdout);
 }
 
-static void
-print_message (const char *color, const char *fmt, va_list * ap)
-{
+static void print_message (const char *color, const char *fmt,
+                           va_list *ap) {
   TERMINAL (stdout, 1);
   fputs ("c ", stdout);
   COLOR (color);
@@ -97,22 +89,14 @@ print_message (const char *color, const char *fmt, va_list * ap)
   fflush (stdout);
 }
 
-static void
-print_line (void)
-{
+static void print_line (void) {
   fputs ("c\n", stdout);
   fflush (stdout);
 }
 
-int
-kissat_verbosity (kissat * solver)
-{
-  return verbosity (solver);
-}
+int kissat_verbosity (kissat *solver) { return verbosity (solver); }
 
-void
-kissat_message (kissat * solver, const char *fmt, ...)
-{
+void kissat_message (kissat *solver, const char *fmt, ...) {
   if (verbosity (solver) < 0)
     return;
   va_list ap;
@@ -121,16 +105,12 @@ kissat_message (kissat * solver, const char *fmt, ...)
   va_end (ap);
 }
 
-void
-kissat_line (kissat * solver)
-{
+void kissat_line (kissat *solver) {
   if (verbosity (solver) >= 0)
     print_line ();
 }
 
-void
-kissat_verbose (kissat * solver, const char *fmt, ...)
-{
+void kissat_verbose (kissat *solver, const char *fmt, ...) {
   if (verbosity (solver) < 1)
     return;
   va_list ap;
@@ -139,9 +119,7 @@ kissat_verbose (kissat * solver, const char *fmt, ...)
   va_end (ap);
 }
 
-void
-kissat_very_verbose (kissat * solver, const char *fmt, ...)
-{
+void kissat_very_verbose (kissat *solver, const char *fmt, ...) {
   if (verbosity (solver) < 2)
     return;
   va_list ap;
@@ -150,9 +128,7 @@ kissat_very_verbose (kissat * solver, const char *fmt, ...)
   va_end (ap);
 }
 
-void
-kissat_extremely_verbose (kissat * solver, const char *fmt, ...)
-{
+void kissat_extremely_verbose (kissat *solver, const char *fmt, ...) {
   if (verbosity (solver) < 3)
     return;
   va_list ap;
@@ -161,9 +137,7 @@ kissat_extremely_verbose (kissat * solver, const char *fmt, ...)
   va_end (ap);
 }
 
-void
-kissat_section (kissat * solver, const char *name)
-{
+void kissat_section (kissat *solver, const char *name) {
   if (verbosity (solver) < 0)
     return;
   TERMINAL (stdout, 1);
@@ -185,10 +159,8 @@ kissat_section (kissat * solver, const char *name)
   fflush (stdout);
 }
 
-void
-kissat_phase (kissat * solver, const char *name, uint64_t count,
-	      const char *fmt, ...)
-{
+void kissat_phase (kissat *solver, const char *name, uint64_t count,
+                   const char *fmt, ...) {
   if (verbosity (solver) < 1)
     return;
   TERMINAL (stdout, 1);
